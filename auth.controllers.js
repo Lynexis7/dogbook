@@ -78,7 +78,7 @@ angular.module('petbook.auth.controllers', [])
     var ID = "";
     return {
 	setID: function (pID) {
-        ID = pID;
+        $scope.ID = pID;
     },
     getID: function () {
         return ID;
@@ -90,7 +90,8 @@ angular.module('petbook.auth.controllers', [])
     var name = "";
     return {
 	setName: function (pName) {
-        name = pName;
+		name = pName;
+        $scope.name = pName;
     },
     getName: function () {
         return name;
@@ -112,9 +113,16 @@ angular.module('petbook.auth.controllers', [])
 		var provider = new firebase.auth.FacebookAuthProvider();
 		provider.addScope('user_birthday');
 		provider.addScope('public_profile');
-		firebase.auth().signInWithRedirect(provider);
+		firebase.auth().signInWithRedirect(provider).then(function(msg)
+		{
+			console.log(msg);
+		}).catch(function(err)
+		{
+			console.log(err);
+		});
 		
 		firebase.auth().getRedirectResult().then(function(result) {
+			console.log(result);
   		if (result.credential) {
     		// This gives you a Facebook Access Token. You can use it to access the Facebook API.
     		var token = result.credential.accessToken;
@@ -127,8 +135,10 @@ angular.module('petbook.auth.controllers', [])
 					var user = result.user;
 					var uid = user.providerData[0].uid;
 					var nombre = user.providerData[0].displayName;
-					$scope.ID = ID.setID(uid);
-					$scope.name = name.setName(nombre);
+					var ID = 0;
+					localStorage.setItem("ID", uid);
+					var name = "xxx";
+					localStorage.setItem("name", nombre);
 					$state.go('app.feed');
   				} else {
     				// No user is signed in.
@@ -137,23 +147,13 @@ angular.module('petbook.auth.controllers', [])
 			});
 		}).catch(function(error) {
   			// Handle Errors here.
-  			var errorCode = error.code;
-			  alert(errorCode);
-  			var errorMessage = error.message;
-			  alert(errorMessage);
-  			// The email of the user's account used.
-  			var email = error.email;
-			  alert(email);
-  			// The firebase.auth.AuthCredential type that was used.
-  			var credential = error.credential;
-			  alert(credential);
+  			 console.log(error);
   			// ...
 		});
 	};
 
-	$scope.ID = ID.getID();
-	$scope.name = name.getName();
-	alert(name.getName());
+	$scope.ID = localStorage.getItem("ID");
+	$scope.name = localStorage.getItem("name");
 
 	$scope.facebookLogOut = function(token){
 		firebase.auth().signOut().then(function() {
